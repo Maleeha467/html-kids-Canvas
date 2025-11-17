@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Home Page</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <style>
+    body {
+background: linear-gradient(120deg, #a1c4fd, #c2e9fb);
+      margin: 0;
+      font-family: sans-serif;
+    }
+
+
+    .display-4 {
+      font-family: "Eater", serif;
+      font-weight: 400;
+    }
+
+    
+    #myCanvas {
+      display: none;
+      border: 1px solid black;
+    }
+
+    /* Default styles (desktop first) */
+
+
+    #toolbar {
+  display: none;
+  position: fixed;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: white;
+  padding: 8px 15px;
+  border-radius: 10px;
+  font-size: 30px;
+  z-index: 9999;        /* makes it sit ON the canvas */
+  gap: 15px;
+}
+
+#toolbar2 {
+  display: none;        /* hidden initially */
+  position: absolute;   /* so it sits on top of canvas */
+  top: 10px;            /* adjust as needed */
+  left: 10px;           /* adjust as needed */
+  background: rgba(255,255,255,0.8);
+  padding: 10px;
+  border-radius: 8px;
+  z-index: 10;          /* make sure it’s above canvas */
+
+}
+
+  .tool-active{
+  background: black;
+  color: white;
+}
+  </style>
+
+  <!-- Load JS after HTML is parsed -->
+  <script defer src="index.js"></script>
+</head>
+<body>
+
+  <!-- Home page content -->
+  <div id="homeContent">
+    <header class="d-flex flex-wrap align-items-center justify-content-center justify-content-md-between py-3 mb-4 border-bottom">
+      <div class="col-md-3 text-end">
+        <button type="button" class="btn btn-outline-dark me-2">+ Add Canvas</button>
+      </div> 
+    </header>
+
+    <div class="px-4 pt-5 my-5 text-center border-bottom">
+      <h1 class="display-4 fw-bold text-body-emphasis">Every masterpiece starts blank</h1>
+      <div class="overflow-hidden" style="max-height: 45vh;">
+        <div class="container px-5">
+          <img src="./1.png" class="img-fluid border rounded-3 shadow-lg mb-4" alt="Example image" width="500" height="500" loading="lazy"> 
+        </div>
+      </div> 
+    </div>
+  </div>
+
+  <!-- Canvas element -->
+<canvas id="myCanvas"></canvas>
+
+
+<div id="toolbar">
+  <button id="pen">✏️</button>
+  <button id="eraser">🧽</button>
+  <button id="marker">🖊️</button>
+  <button id="clear">🗑️</button>
+    <button id="home">🏠</button>
+</div>
+
+
+
+  <div id="toolbar2">
+    <button id="colorPicker">🎨 Colors</button>
+    <div id="colorOptions" style="display:none;">
+      <button class="color-btn" data-color="blue" style="background: blue;"></button>
+      <button class="color-btn" data-color="red" style="background: red;"></button>
+      <button class="color-btn" data-color="green" style="background: green;"></button>
+      <button class="color-btn" data-color="yellow" style="background: yellow;"></button>
+      <button class="color-btn" data-color="orange" style="background: orange;"></button>
+      <button class="color-btn" data-color="purple" style="background: purple;"></button>
+    </div>
+  </div>
+</div>
+
+
+</body>
+</html>
