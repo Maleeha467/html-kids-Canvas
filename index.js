@@ -21,12 +21,23 @@ function activate(btn) {
 }
 
 function resizeCanvas() {
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
+    // Handle high-DPI (retina) screens properly so strokes are sharp
+    const dpr = window.devicePixelRatio || 1;
 
-    // Optional: redraw background
+    // Keep the CSS size equal to the viewport
+    canvas.style.width = window.innerWidth + 'px';
+    canvas.style.height = window.innerHeight + 'px';
+
+    // Set the internal pixel buffer to DPR * CSS size
+    canvas.width = Math.floor(window.innerWidth * dpr);
+    canvas.height = Math.floor(window.innerHeight * dpr);
+
+    // Reset any transform and scale so drawing uses CSS pixels
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+    // Redraw background (in CSS pixels)
     ctx.fillStyle = 'white';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.fillRect(0, 0, window.innerWidth, window.innerHeight);
 }
 
 // Resize at start
@@ -34,6 +45,9 @@ resizeCanvas();
 
 // Resize whenever window changes size
 window.addEventListener('resize', resizeCanvas);
+
+// Prevent the canvas from triggering page scrolling while drawing on touch devices
+canvas.style.touchAction = 'none';
 
 home.addEventListener('click', () => {
     homeContent.style.display = 'block';   // show home
@@ -101,19 +115,32 @@ let currentColor = 'black';
 let currentSize = 6;
 let lastX = 0;
 let lastY = 0;
+// --- POINTER / TOUCH / MOUSE EVENTS ---
+// Use Pointer Events where available (covers mouse, touch, pen). Provide a tiny
+// fallback for touchmove to prevent the browser from scrolling while drawing.
 
-// --- MOUSE EVENTS ---
-canvas.addEventListener('mousedown', (e) => {
+function getPointerPos(e) {
+    const rect = canvas.getBoundingClientRect();
+    return {
+        x: e.clientX - rect.left,
+        y: e.clientY - rect.top
+    };
+}
+
+canvas.addEventListener('pointerdown', (e) => {
+    // Only react to left mouse button or any touch/pen contact
     isDrawing = true;
-    lastX = e.offsetX;
-    lastY = e.offsetY;
+    const pos = getPointerPos(e);
+    lastX = pos.x;
+    lastY = pos.y;
+    // Capture the pointer so we continue to receive events even if finger moves fast
+    try { canvas.setPointerCapture(e.pointerId); } catch (err) { /* ignore */ }
 });
 
-canvas.addEventListener('mouseup', () => isDrawing = false);
-canvas.addEventListener('mouseleave', () => isDrawing = false);
-
-canvas.addEventListener('mousemove', (e) => {
+canvas.addEventListener('pointermove', (e) => {
     if (!isDrawing) return;
+
+    const pos = getPointerPos(e);
 
     ctx.strokeStyle = currentColor;
     ctx.lineWidth = currentSize;
@@ -122,12 +149,25 @@ canvas.addEventListener('mousemove', (e) => {
 
     ctx.beginPath();
     ctx.moveTo(lastX, lastY);
-    ctx.lineTo(e.offsetX, e.offsetY);
+    ctx.lineTo(pos.x, pos.y);
     ctx.stroke();
 
-    lastX = e.offsetX;
-    lastY = e.offsetY;
+    lastX = pos.x;
+    lastY = pos.y;
 });
+
+function endDrawing(e) {
+    isDrawing = false;
+    try { canvas.releasePointerCapture && canvas.releasePointerCapture(e.pointerId); } catch (err) { /* ignore */ }
+}
+
+canvas.addEventListener('pointerup', endDrawing);
+canvas.addEventListener('pointercancel', endDrawing);
+
+// Older browsers/devices: prevent the default touchmove behavior (scrolling)
+canvas.addEventListener('touchmove', (e) => {
+    if (e.touches && e.touches.length > 0) e.preventDefault();
+}, { passive: false });
 
 // Tool selection (for example, changing color)
 // Assuming you add an element with the class 'tool' to your HTML, e.g., a button for the pen.
